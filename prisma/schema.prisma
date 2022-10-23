@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  username String @unique
+  password String
+  default Boolean @default(false)
+  roleState Boolean @default(true)
+  region String @default("全球")
+  Region Region? @relation(fields: [region],references: [value])
+  roleId Int
+  Role Role @relation(fields: [roleId],references: [id])
+  news New[]
+}
+
+model Role{
+  id Int @id @default(autoincrement())
+  rolename String
+  roleType Int
+  users User[]
+  rights Right[]
+  news New[]
+}
+
+model Right{
+  id Int @id @default(autoincrement())
+  title String
+  key String @unique
+  pagepermission Int?
+  routerpermission Int?
+  grade Int @default(1)
+  Role Role[]
+  children Right[] @relation("children")
+  rightId Int?
+  right Right? @relation("children",fields: [rightId],references: [id])
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  title String @unique
+  value String @unique
+  news New[]
+}
+
+model Region{
+  id Int @id @default(autoincrement())
+  title String @unique
+  value String @unique
+  news New[]
+  users User[]
+}
+
+model New{
+  id Int @id @default(autoincrement())
+  author String
+  User User @relation(fields: [author],references: [username])
+  categoryId Int
+  Category Category @relation(fields: [categoryId],references: [id])
+  region String @default("全球")
+  Region Region? @relation(fields: [region],references: [value])
+  roleId Int
+  Role Role @relation(fields: [roleId],references: [id])
+  auditState Int @default(0)
+  publishState Int @default(0)
+  createTime DateTime @default(now())
+  updateTime DateTime?
+  title String
+  article String @db.LongText
+  star Int @default(0)
+  view Int @default(0)
+  publishTime DateTime?
+  coverImage String?
+}
